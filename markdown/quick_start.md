@@ -52,8 +52,12 @@
    ```bash
    python create_lines_files.py
    ```
+
    A folder is created for each product inside `assets/lines/` containing a `lines.txt` file.
    Add one product entry per line in these files; the lines will be delivered to buyers in order.
+
+   Add one product entry per line inside the created files in `assets/lines/`. These lines will be delivered to buyers.
+
 
 ### P.S.
 1. Add the bot to the channel and group you have provided and make it an admin

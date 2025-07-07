@@ -47,6 +47,17 @@ def ensure_lines_file(item_name: str) -> str:
     folder = ensure_lines_folder(item_name)
     return os.path.join(folder, "lines.txt")
 
+def ensure_lines_file(item_name: str) -> str:
+    """Return path to the inventory text file for the given item.
+
+    The file is created inside ``assets/lines`` and named using a sanitized
+    version of ``item_name``.  All directories are created if necessary.
+    """
+    folder = os.path.join("assets", "lines")
+    os.makedirs(folder, exist_ok=True)
+    return os.path.join(folder, f"{sanitize_name(item_name)}.txt")
+
+
 
 def pop_line_from_file(item_name: str) -> str | None:
     """Pop and return the first non-empty line from the item's text file.
