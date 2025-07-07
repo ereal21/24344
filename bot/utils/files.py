@@ -28,3 +28,40 @@ def cleanup_item_file(file_path: str) -> None:
         folder = os.path.dirname(file_path)
         if os.path.isdir(folder) and not os.listdir(folder):
             os.rmdir(folder)
+
+
+def ensure_lines_file(item_name: str) -> str:
+    """Return path to the inventory text file for the given item.
+
+    The file is created inside ``assets/lines`` and named using a sanitized
+    version of ``item_name``.  All directories are created if necessary.
+    """
+    folder = os.path.join("assets", "lines")
+    os.makedirs(folder, exist_ok=True)
+    return os.path.join(folder, f"{sanitize_name(item_name)}.txt")
+
+
+def pop_line_from_file(item_name: str) -> str | None:
+    """Pop and return the first non-empty line from the item's text file.
+
+    If the file does not exist or contains no lines, ``None`` is returned.
+    The popped line is removed from the file.
+    """
+    path = ensure_lines_file(item_name)
+    if not os.path.isfile(path):
+        return None
+
+    with open(path, "r+", encoding="utf-8") as f:
+        lines = f.readlines()
+        # Remove empty lines and preserve newline characters for remaining lines
+        lines = [ln for ln in lines if ln.strip()]
+        if not lines:
+            # Truncate file if it only contained empty lines
+            f.seek(0)
+            f.truncate()
+            return None
+        first = lines.pop(0).rstrip("\n")
+        f.seek(0)
+        f.truncate()
+        f.writelines([ln if ln.endswith("\n") else ln + "\n" for ln in lines])
+    return first
