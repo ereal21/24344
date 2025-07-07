@@ -28,8 +28,6 @@ from bot.database.methods import (
     get_item_info,
     select_item_values_amount,
     get_user_balance,
-    get_item_value,
-    buy_item,
     add_bought_item,
     buy_item_for_balance,
     select_user_operations,
@@ -49,7 +47,7 @@ from bot.database.methods import (
     update_user_language,
     get_unfinished_operation,
 )
-from bot.utils.files import cleanup_item_file
+from bot.utils.files import pop_line_from_file
 from bot.handlers.other import get_bot_user_ids, get_bot_info
 from bot.keyboards import (
     main_menu,
@@ -501,43 +499,22 @@ async def buy_item_callback_handler(call: CallbackQuery):
     user_balance = get_user_balance(user_id)
 
     if user_balance >= item_price:
-        value_data = get_item_value(item_name)
+        value_line = pop_line_from_file(item_name)
 
-        if value_data:
+        if value_line:
             current_time = datetime.datetime.now()
             formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
             new_balance = buy_item_for_balance(user_id, item_price)
-            if os.path.isfile(value_data["value"]):
-                with open(value_data["value"], "rb") as photo:
-                    await bot.send_photo(
-                        chat_id=call.message.chat.id,
-                        photo=photo,
-                        caption=f"✅ Item purchased. <b>Balance</b>: <i>{new_balance}</i>€",
-                        parse_mode="HTML",
-                        reply_markup=home_markup(get_user_language(user_id) or "en"),
-                    )
-                os.remove(value_data["value"])
-                await bot.edit_message_text(
-                    chat_id=call.message.chat.id,
-                    message_id=msg,
-                    text="✅ Item purchased.",
-                    reply_markup=back(f"item_{item_name}"),
-                )
-                buy_item(value_data["id"], value_data["is_infinity"])
-                cleanup_item_file(value_data["value"])
-
-            else:
-                await bot.edit_message_text(
-                    chat_id=call.message.chat.id,
-                    message_id=msg,
-                    text=f'✅ Item purchased. <b>Balance</b>: <i>{new_balance}</i>€\n\n{value_data["value"]}',
-                    parse_mode="HTML",
-                    reply_markup=home_markup(get_user_language(user_id) or "en"),
-                )
-                buy_item(value_data["id"], value_data["is_infinity"])
+            await bot.edit_message_text(
+                chat_id=call.message.chat.id,
+                message_id=msg,
+                text=f'✅ Item purchased. <b>Balance</b>: <i>{new_balance}</i>€\n\n{value_line}',
+                parse_mode="HTML",
+                reply_markup=home_markup(get_user_language(user_id) or "en"),
+            )
             add_bought_item(
-                value_data["item_name"],
-                value_data["value"],
+                item_name,
+                value_line,
                 item_price,
                 user_id,
                 formatted_time,
@@ -546,7 +523,7 @@ async def buy_item_callback_handler(call: CallbackQuery):
             user_info = await bot.get_chat(user_id)
             logger.info(
                 f"User {user_id} ({user_info.first_name})"
-                f" bought 1 item of {value_data['item_name']} for {item_price}€"
+                f" bought 1 item of {item_name} for {item_price}€"
             )
             return
 

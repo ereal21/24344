@@ -46,8 +46,13 @@
       ```
       NOWPAYMENTS_IPN_URL=https://xxxx.ngrok-free.app/nowpayments-ipn
       ```
-  7. Run run.py
-   8. Make sure your self-hosted nodes are up and RPC endpoints match the URLs above.
+7. Run run.py
+8. Make sure your self-hosted nodes are up and RPC endpoints match the URLs above.
+9. Initialize inventory files:
+   ```bash
+   python create_lines_files.py
+   ```
+   Add one product entry per line inside the created files in `assets/lines/`. These lines will be delivered to buyers.
 
 ### P.S.
 1. Add the bot to the channel and group you have provided and make it an admin
