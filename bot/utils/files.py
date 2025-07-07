@@ -30,6 +30,23 @@ def cleanup_item_file(file_path: str) -> None:
             os.rmdir(folder)
 
 
+def ensure_lines_folder(item_name: str) -> str:
+    """Return folder path for storing text-line inventory for ``item_name``."""
+    folder = os.path.join("assets", "lines", sanitize_name(item_name))
+    os.makedirs(folder, exist_ok=True)
+    return folder
+
+
+def ensure_lines_file(item_name: str) -> str:
+    """Return path to the inventory text file for the given item.
+
+    The file ``lines.txt`` is created inside ``assets/lines/<item>/`` where
+    ``<item>`` is a sanitized version of the item name. All directories are
+    created if necessary.
+    """
+    folder = ensure_lines_folder(item_name)
+    return os.path.join(folder, "lines.txt")
+
 def ensure_lines_file(item_name: str) -> str:
     """Return path to the inventory text file for the given item.
 
@@ -39,6 +56,7 @@ def ensure_lines_file(item_name: str) -> str:
     folder = os.path.join("assets", "lines")
     os.makedirs(folder, exist_ok=True)
     return os.path.join(folder, f"{sanitize_name(item_name)}.txt")
+
 
 
 def pop_line_from_file(item_name: str) -> str | None:
